@@ -1,22 +1,22 @@
-# ov CLI 使用指南
+# vivarcus CLI 使用指南
 
 ## 简介
 
-`ov` 是 Vivarcus 平台的命令行工具，用于操作 Domain、Vault、对象记录、组件元数据等资源。
+`vivarcus` 是 Vivarcus 平台的命令行工具，用于操作 Domain、Vault、对象记录、组件元数据等资源。
 
 ## 快速开始
 
 ```bash
 # 登录（OAuth Device Flow）
-ov auth login --endpoint http://127.0.0.1:8080
+vivarcus auth login --endpoint http://127.0.0.1:8080
 
 # 查看状态
-ov auth status
+vivarcus auth status
 ```
 
 ## 配置管理
 
-配置文件位于 `~/.config/ov/config.yaml`：
+配置文件位于 `~/.config/vivarcus/config.yaml`：
 
 ```yaml
 profiles:
@@ -27,22 +27,22 @@ profiles:
     default_vault: ""
 ```
 
-支持多 profile 切换：`ov --profile prod config list`
+支持多 profile 切换：`vivarcus --profile prod config list`
 
 环境变量（优先级低于 flag）：
 
 | 变量 | 对应配置 |
 |------|----------|
-| `OV_TOKEN` | token |
-| `OV_ENDPOINT` | endpoint |
-| `OV_VAULT` | default_vault |
+| `VIVARCUS_TOKEN` | token |
+| `VIVARCUS_ENDPOINT` | endpoint |
+| `VIVARCUS_VAULT` | default_vault |
 
 ### 子命令
 
 ```bash
-ov config list                          # 列出所有 profile
-ov config get endpoint                  # 获取当前 profile 的值
-ov config set default_vault <vault-id>  # 设置值
+vivarcus config list                          # 列出所有 profile
+vivarcus config get endpoint                  # 获取当前 profile 的值
+vivarcus config set default_vault <vault-id>  # 设置值
 ```
 
 ## 全局 Flags
@@ -63,12 +63,12 @@ ov config set default_vault <vault-id>  # 设置值
 
 ## 认证
 
-### ov auth login
+### vivarcus auth login
 
 发起 OAuth Device Flow 登录，认证成功后将 token 写入当前 profile。
 
 ```bash
-ov auth login --endpoint http://127.0.0.1:8080
+vivarcus auth login --endpoint http://127.0.0.1:8080
 ```
 
 | Flag | 说明 |
@@ -76,16 +76,16 @@ ov auth login --endpoint http://127.0.0.1:8080
 | `--scopes` | PAT 权限范围（默认 `object:read,object:write,domain:read,component:read,security:token_create`） |
 | `--no-browser` | 不自动打开浏览器 |
 
-### ov auth logout
+### vivarcus auth logout
 
 ```bash
-ov auth logout
+vivarcus auth logout
 ```
 
-### ov auth status
+### vivarcus auth status
 
 ```bash
-ov auth status
+vivarcus auth status
 # 输出: Logged in as <user-id> (profile "default")
 ```
 
@@ -93,10 +93,10 @@ ov auth status
 
 ```bash
 # 列出可访问的 domain
-ov domain list
+vivarcus domain list
 
 # 获取指定 domain
-ov domain get <domain-id>
+vivarcus domain get <domain-id>
 ```
 
 ## Vault
@@ -105,23 +105,23 @@ ov domain get <domain-id>
 
 ```bash
 # 列出 vault
-ov vault list
+vivarcus vault list
 
 # 获取指定 vault
-ov vault get <vault-id>
+vivarcus vault get <vault-id>
 ```
 
 ### Sandbox
 
 ```bash
 # 列出 sandbox
-ov vault sandbox list --vault <parent-vault-id>
+vivarcus vault sandbox list --vault <parent-vault-id>
 
 # 获取指定 sandbox
-ov vault sandbox get <sandbox-id> --vault <parent-vault-id>
+vivarcus vault sandbox get <sandbox-id> --vault <parent-vault-id>
 
 # 创建 sandbox（从源 vault）
-ov vault sandbox create \
+vivarcus vault sandbox create \
   --vault <parent-vault-id> \
   --source-vault <source-vault-id> \
   --domain <domain-id> \
@@ -130,18 +130,18 @@ ov vault sandbox create \
   --wait
 
 # 创建 sandbox（从快照）
-ov vault sandbox create \
+vivarcus vault sandbox create \
   --source-snapshot <snapshot-api-name> \
   --domain <domain-id> \
   --name from-snapshot
 
 # 刷新 sandbox
-ov vault sandbox refresh <sandbox-id> \
+vivarcus vault sandbox refresh <sandbox-id> \
   --vault <parent-vault-id> \
   --source-vault <source-vault-id>
 
 # 删除 sandbox
-ov vault sandbox delete <sandbox-id> --confirm
+vivarcus vault sandbox delete <sandbox-id> --confirm
 ```
 
 Sandbox create 参数：
@@ -169,22 +169,22 @@ Sandbox delete 参数：
 
 ```bash
 # 列出 sandbox 的 snapshot
-ov vault sandbox snapshot list <sandbox-id>
+vivarcus vault sandbox snapshot list <sandbox-id>
 
 # 获取指定 snapshot
-ov vault sandbox snapshot get <snapshot-id>
+vivarcus vault sandbox snapshot get <snapshot-id>
 
 # 创建 snapshot
-ov vault sandbox snapshot create <sandbox-id> \
+vivarcus vault sandbox snapshot create <sandbox-id> \
   --name v1-snapshot \
   --description "Release v1" \
   --wait
 
 # 更新（重建）snapshot
-ov vault sandbox snapshot update <snapshot-id>
+vivarcus vault sandbox snapshot update <snapshot-id>
 
 # 删除 snapshot
-ov vault sandbox snapshot delete <snapshot-id> --confirm
+vivarcus vault sandbox snapshot delete <snapshot-id> --confirm
 ```
 
 Snapshot create 参数：
@@ -209,115 +209,115 @@ Snapshot create 参数：
 
 ```bash
 # 列出对象记录
-ov object list <object> --vault <vault-id>
-ov object list <object> --fields "id,name__v,status__v" --limit 50
+vivarcus object list <object> --vault <vault-id>
+vivarcus object list <object> --fields "id,name__v,status__v" --limit 50
 
 # 获取单条记录
-ov object get <object> <record-id>
-ov object get <record-id> --object <object>
+vivarcus object get <object> <record-id>
+vivarcus object get <record-id> --object <object>
 
 # 创建记录（JSON 文件）
-ov object create <object> --file record.json
+vivarcus object create <object> --file record.json
 
 # 单条: {"name__v": "example"}
 # 批量: [{"name__v": "a"}, {"name__v": "b"}]
 
 # 从 stdin 创建
-echo '{"name__v": "hello"}' | ov object create <object> --file -
+echo '{"name__v": "hello"}' | vivarcus object create <object> --file -
 
 # 更新记录
-ov object update <object> <record-id> --file update.json
+vivarcus object update <object> <record-id> --file update.json
 
 # 删除记录
-ov object delete <object> <record-id> --confirm
+vivarcus object delete <object> <record-id> --confirm
 
 # VQL 查询
-ov object query -q "SELECT id, name__v FROM <object> WHERE status__v = 'active__v'"
-ov object query --file query.vql
+vivarcus object query -q "SELECT id, name__v FROM <object> WHERE status__v = 'active__v'"
+vivarcus object query --file query.vql
 
 # 切换对象类型
-ov object switch-type <object> <record-id> --object-type <target-type>
+vivarcus object switch-type <object> <record-id> --object-type <target-type>
 ```
 
 ## Object 元数据
 
 ```bash
 # Schema
-ov object schema list
-ov object schema get <object-name>
-ov object schema get <object-name> --include-mdl
+vivarcus object schema list
+vivarcus object schema get <object-name>
+vivarcus object schema get <object-name> --include-mdl
 
 # Picklist
-ov object picklist list
-ov object picklist get <picklist-name>
-ov object picklist update <picklist-name> --file update.json
+vivarcus object picklist list
+vivarcus object picklist get <picklist-name>
+vivarcus object picklist update <picklist-name> --file update.json
 ```
 
 ## Component
 
 ```bash
 # 列出组件（可按类型过滤）
-ov component list
-ov component list --type Object
+vivarcus component list
+vivarcus component list --type Object
 
 # 获取组件
-ov component get Object <component-name>
-ov component get Object <component-name> --include-mdl
+vivarcus component get Object <component-name>
+vivarcus component get Object <component-name> --include-mdl
 
 # 创建组件（从 JSON 属性文件）
-ov component create Picklist my-picklist --file attrs.json
+vivarcus component create Picklist my-picklist --file attrs.json
 
 # 应用 MDL
-ov component apply-mdl --file changes.mdl
+vivarcus component apply-mdl --file changes.mdl
 ```
 
 ## Security
 
 ```bash
 # 用户管理
-ov security user list --vault <vault-id>
-ov security user list --limit 50
-ov security user get <user-record-id>
+vivarcus security user list --vault <vault-id>
+vivarcus security user list --limit 50
+vivarcus security user get <user-record-id>
 
 # 角色管理
-ov security role list --vault <vault-id>
+vivarcus security role list --vault <vault-id>
 
 # 分配角色给用户
-ov security role assign \
+vivarcus security role assign \
   --user <user-record-id> \
   --role <application-role-id> \
   --status active__v
 
 # 从 MDL 文件分配角色权限
-ov security role assign --file role.mdl
+vivarcus security role assign --file role.mdl
 ```
 
 ## Lifecycle
 
 ```bash
 # 查看记录可用的生命周期动作
-ov lifecycle actions <object> <record-id>
+vivarcus lifecycle actions <object> <record-id>
 
 # 执行生命周期转换
-ov lifecycle transition <object> <record-id> --action approve__v
+vivarcus lifecycle transition <object> <record-id> --action approve__v
 ```
 
 ## Object Action
 
 ```bash
 # 执行对象记录动作（如创建草稿）
-ov action execute <object> <record-id> --action create_draft__v
+vivarcus action execute <object> <record-id> --action create_draft__v
 ```
 
 ## Operation
 
 ```bash
 # 查看异步操作状态
-ov operation status <operation-id>
+vivarcus operation status <operation-id>
 
 # 列出当前用户的操作
-ov operation list
-ov operation list --status failed
+vivarcus operation list
+vivarcus operation list --status failed
 ```
 
 `--status` 可选值：`pending`、`running`、`success`、`failed`、`cancelled`
@@ -333,7 +333,7 @@ ov operation list --status failed
 配置默认格式：
 
 ```bash
-ov config set default_format json
+vivarcus config set default_format json
 ```
 
 ## 错误处理
@@ -353,71 +353,71 @@ ov config set default_format json
 ## 命令速查表
 
 ```
-ov [--profile,-p <name>] [--token <pat>] [--endpoint <url>]
+vivarcus [--profile,-p <name>] [--token <pat>] [--endpoint <url>]
   [--json|--table|--quiet,-q] [--verbose,-v] [--confirm] [--version]
 
 认证
-  ov auth login  [--scopes <scopes>] [--no-browser]
-  ov auth logout
-  ov auth status
+  vivarcus auth login  [--scopes <scopes>] [--no-browser]
+  vivarcus auth logout
+  vivarcus auth status
 
 配置
-  ov config list
-  ov config get  <key>
-  ov config set  <key> <value>
+  vivarcus config list
+  vivarcus config get  <key>
+  vivarcus config set  <key> <value>
 
 Domain
-  ov domain list
-  ov domain get  <domain-id>
+  vivarcus domain list
+  vivarcus domain get  <domain-id>
 
 Vault
-  ov vault list
-  ov vault get   <vault-id>
-  ov vault sandbox create   [flags]             # 异步
-  ov vault sandbox refresh  <sandbox-id> [flags] # 异步
-  ov vault sandbox delete   <sandbox-id>
-  ov vault sandbox list
-  ov vault sandbox get      <sandbox-id>
-  ov vault sandbox snapshot create  <sandbox-id> [flags]  # 异步
-  ov vault sandbox snapshot update  <snapshot-id> [flags]  # 异步
-  ov vault sandbox snapshot delete  <snapshot-id>
-  ov vault sandbox snapshot list    <sandbox-id>
-  ov vault sandbox snapshot get     <snapshot-id>
+  vivarcus vault list
+  vivarcus vault get   <vault-id>
+  vivarcus vault sandbox create   [flags]             # 异步
+  vivarcus vault sandbox refresh  <sandbox-id> [flags] # 异步
+  vivarcus vault sandbox delete   <sandbox-id>
+  vivarcus vault sandbox list
+  vivarcus vault sandbox get      <sandbox-id>
+  vivarcus vault sandbox snapshot create  <sandbox-id> [flags]  # 异步
+  vivarcus vault sandbox snapshot update  <snapshot-id> [flags]  # 异步
+  vivarcus vault sandbox snapshot delete  <snapshot-id>
+  vivarcus vault sandbox snapshot list    <sandbox-id>
+  vivarcus vault sandbox snapshot get     <snapshot-id>
 
 Object
-  ov object list     <object>
-  ov object get      <object> <record-id>
-  ov object create   <object>       [-f <file>]
-  ov object update   <object> <id>  [-f <file>]
-  ov object delete   <object> <id>
-  ov object query    [-q <vql> | -f <file>]
-  ov object schema list
-  ov object schema get  <name>
-  ov object picklist list
-  ov object picklist get  <name>
-  ov object picklist update <name>  [-f <file>]
-  ov object switch-type <object> <id> --object-type <type>
+  vivarcus object list     <object>
+  vivarcus object get      <object> <record-id>
+  vivarcus object create   <object>       [-f <file>]
+  vivarcus object update   <object> <id>  [-f <file>]
+  vivarcus object delete   <object> <id>
+  vivarcus object query    [-q <vql> | -f <file>]
+  vivarcus object schema list
+  vivarcus object schema get  <name>
+  vivarcus object picklist list
+  vivarcus object picklist get  <name>
+  vivarcus object picklist update <name>  [-f <file>]
+  vivarcus object switch-type <object> <id> --object-type <type>
 
 Component
-  ov component list     [--type <type>]
-  ov component get      <type> <name>  [--include-mdl]
-  ov component create   <type> <name>  [-f <attrs.json>]
-  ov component apply-mdl               [-f <file>]
+  vivarcus component list     [--type <type>]
+  vivarcus component get      <type> <name>  [--include-mdl]
+  vivarcus component create   <type> <name>  [-f <attrs.json>]
+  vivarcus component apply-mdl               [-f <file>]
 
 Security
-  ov security user list
-  ov security user get   <user-record-id>
-  ov security role list
-  ov security role assign  [--user <id> --role <id> | -f <mdl>]
+  vivarcus security user list
+  vivarcus security user get   <user-record-id>
+  vivarcus security role list
+  vivarcus security role assign  [--user <id> --role <id> | -f <mdl>]
 
 Lifecycle
-  ov lifecycle actions     <object> <record-id>
-  ov lifecycle transition  <object> <record-id> --action <action>
+  vivarcus lifecycle actions     <object> <record-id>
+  vivarcus lifecycle transition  <object> <record-id> --action <action>
 
 Action
-  ov action execute  <object> <record-id> --action <action>
+  vivarcus action execute  <object> <record-id> --action <action>
 
 Operation
-  ov operation status  <operation-id>
-  ov operation list    [--status <status>]
+  vivarcus operation status  <operation-id>
+  vivarcus operation list    [--status <status>]
 ```
