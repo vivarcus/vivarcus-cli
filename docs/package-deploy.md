@@ -24,7 +24,7 @@ vivarcus package deploy <package_id> --confirm --json
 # 期望 deployment_status 为 deployed__v
 ```
 
-部署成功后平台会创建 **inactive** 的 `Recordaction` / `Objectaction`；须管理员 `ALTER ... active(true)` 后按钮才在 UI 出现。详见 vivarcus-sdk 文档中的 MDL 激活步骤。
+部署成功后平台会创建 **active** 的 `Recordaction` / `Objectaction`；记录页按钮 deploy 完成即可在 UI 出现。详见 vivarcus-sdk [05-deploy](https://github.com/vivarcus/vivarcus-sdk/blob/main/docs/05-deploy.md)。
 
 ## 权限
 

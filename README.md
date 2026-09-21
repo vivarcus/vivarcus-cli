@@ -26,8 +26,8 @@ VERSION=v26R3.3-13304 curl -fsSL https://raw.githubusercontent.com/vivarcus/viva
 # ???OAuth Device Flow?
 vivarcus auth login --endpoint https://<your-vault>.vivarcus.com
 
-# ? Agent / CI??? PAT
-export VIVARCUS_TOKEN=ov_pat_...
+# Agent / CI: inject token once; do not password-login before every command (4/min/IP+user)
+export VIVARCUS_TOKEN=<session-token>
 export VIVARCUS_ENDPOINT=https://<your-vault>.vivarcus.com
 export VIVARCUS_VAULT=<vault-uuid>
 
@@ -46,7 +46,7 @@ vivarcus object list study__v --limit 5 --json
 
 | ?? | ?? |
 |------|------|
-| [vivarcus/vivarcus-sdk](https://github.com/vivarcus/vivarcus-sdk) | Record Action ???`ov-sdk build` ? wasm? |
+| [vivarcus/vivarcus-sdk](https://github.com/vivarcus/vivarcus-sdk) | Record Action ???`vivarcus-sdk build` ? wasm? |
 
 ## ??
 

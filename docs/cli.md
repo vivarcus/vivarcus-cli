@@ -49,7 +49,7 @@ vivarcus config set default_vault <vault-id>  # 设置值
 
 | Flag | 简写 | 类型 | 说明 |
 |------|------|------|------|
-| `--token` | | string | API Key / PAT |
+| `--token` | | string | session token |
 | `--endpoint` | | string | API 端点 URL |
 | `--profile` | `-p` | string | 配置 profile（默认 `default`） |
 | `--json` | | bool | JSON 格式输出 |
@@ -73,10 +73,11 @@ vivarcus auth login --endpoint http://127.0.0.1:8080
 
 | Flag | 说明 |
 |------|------|
-| `--scopes` | PAT 权限范围（默认 `object:read,object:write,domain:read,component:read,security:token_create`） |
 | `--no-browser` | 不自动打开浏览器 |
 
 ### vivarcus auth logout
+
+吊销服务端 session，并清除当前 profile 中的本地 token。
 
 ```bash
 vivarcus auth logout
@@ -87,6 +88,26 @@ vivarcus auth logout
 ```bash
 vivarcus auth status
 # 输出: Logged in as <user-id> (profile "default")
+```
+
+### Agent / 自动化：避免登录限流
+
+密码登录（`POST /ui/auth/login`、Vault REST `POST /api/{version}/auth`）受防爆破限流：**同一客户端 IP + 用户名，1 分钟内最多 4 次**。超限返回 HTTP 429 与 `Retry-After`；请求不会进入密码校验，也不计入账号锁定。
+
+自动化脚本与编码 Agent **应**：
+
+1. **整段任务复用 session token**（`VIVARCUS_TOKEN`、`--token` 或 profile `token`）。session 在闲置超时前有效，最长 48 小时——不要在每条 `vivarcus` 命令前重新 login。
+2. **不要**在循环或多脚本中反复密码登录（含 `curl` 打 `/ui/auth/login`）。
+3. **优先注入已有 token**（浏览器、一次性人工 `auth login`、CI secret）；headless 环境勿依赖 Device Flow。
+4. 已 429 时按 `Retry-After` 等待后再试。
+
+`vivarcus auth login`（Device Flow）不走密码 4/min 限流，但仅适合人工首次取 token；取到后写入 profile 或环境变量供后续复用。
+
+```bash
+export VIVARCUS_TOKEN=<session-token>
+export VIVARCUS_ENDPOINT=http://127.0.0.1:8080
+export VIVARCUS_VAULT=<vault-uuid>
+vivarcus auth status --json
 ```
 
 ## Domain
@@ -353,11 +374,11 @@ vivarcus config set default_format json
 ## 命令速查表
 
 ```
-vivarcus [--profile,-p <name>] [--token <pat>] [--endpoint <url>]
+vivarcus [--profile,-p <name>] [--token <session-token>] [--endpoint <url>]
   [--json|--table|--quiet,-q] [--verbose,-v] [--confirm] [--version]
 
 认证
-  vivarcus auth login  [--scopes <scopes>] [--no-browser]
+  vivarcus auth login  [--no-browser]
   vivarcus auth logout
   vivarcus auth status
 
