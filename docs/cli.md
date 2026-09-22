@@ -92,7 +92,7 @@ vivarcus auth status
 
 ### Agent / 自动化：避免登录限流
 
-密码登录（`POST /ui/auth/login`、Vault REST `POST /api/{version}/auth`）受防爆破限流：**同一客户端 IP + 用户名，1 分钟内最多 4 次**。超限返回 HTTP 429 与 `Retry-After`；请求不会进入密码校验，也不计入账号锁定。
+密码登录（`POST /ui/auth/login`、Vault REST `POST /api/{version}/auth`）受防爆破限流：**同一客户端 IP + 用户名，1 分钟内最多 10 次**。超限返回 HTTP 429 与 `Retry-After`；请求不会进入密码校验，也不计入账号锁定。
 
 自动化脚本与编码 Agent **应**：
 
@@ -101,7 +101,7 @@ vivarcus auth status
 3. **优先注入已有 token**（浏览器、一次性人工 `auth login`、CI secret）；headless 环境勿依赖 Device Flow。
 4. 已 429 时按 `Retry-After` 等待后再试。
 
-`vivarcus auth login`（Device Flow）不走密码 4/min 限流，但仅适合人工首次取 token；取到后写入 profile 或环境变量供后续复用。
+`vivarcus auth login`（Device Flow）不走密码 10/min 限流，但仅适合人工首次取 token；取到后写入 profile 或环境变量供后续复用。
 
 ```bash
 export VIVARCUS_TOKEN=<session-token>
@@ -346,6 +346,44 @@ vivarcus operation list --status failed
 
 `--status` 可选值：`pending`、`running`、`success`、`failed`、`cancelled`
 
+## SDK（Runtime Log 与 Go 源码）
+
+配合 [Go SDK](https://github.com/vivarcus/vivarcus-sdk) 使用。编号示例（01–09）用 **单文件 `sdk put`** 部署；多文件树用 [Inbound VPK](package-deploy.md)（`vivarcus package import` / `deploy`）。
+
+> **CLI 版本**：`sdk put`、`get`、`enable`、`disable`、`logs` 在 **晚于 `v26R3.3-13318`** 的 [vivarcus-cli Release](https://github.com/vivarcus/vivarcus-cli/releases) 中提供。`v26R3.3-13318` 及更早仅有 `sdk status`；请升级 CLI 或暂用 [VPK 部署](package-deploy.md)。
+
+```bash
+# 运行时状态
+vivarcus sdk status --vault <vault-id>
+
+# 按 UTC 日下载 SDK Runtime Log（platform.LogInfo / 异常）
+vivarcus sdk logs --date 2026-09-21 --format csv -o /tmp/SdkLog.zip --json
+
+# 下载单个客户组件源码
+vivarcus sdk get com.example.actions.SetTitle -o actions/set_title.go --json
+
+# 上传或覆盖一个 .go（增量合并后整树重编译）
+cd examples/02-update-field   # 客户 module 目录
+vivarcus sdk put -f actions/set_title.go --json
+vivarcus sdk put -f /tmp/title.go --path shared/title.go --module github.com.acme.corp.hello --json
+
+# 启停客户入口组件（Operational Status）
+vivarcus sdk enable com.example.actions.SetTitle --json
+vivarcus sdk disable com.example.actions.SetTitle --json
+```
+
+| 子命令 | 说明 |
+|--------|------|
+| `status` | Vault 上 Go SDK 运行时摘要 |
+| `logs` | 下载指定 UTC 日的 Runtime Log ZIP（`--date` 必填，最多 30 天）；别名 `runtime-log` |
+| `get` | `GET /code/{class_name}`；别名 `download`、`source` |
+| `put` | `PUT /code`，`-f` 必填；别名 `upload`、`add` |
+| `enable` / `disable` | 切换客户入口组件运行状态 |
+
+`put` 成功时 API `responseMessage` 为 `Modified file`。不支持 `DELETE /code/{name}`；回退多文件变更请重新 `package import`。
+
+部署与示例步骤详见 vivarcus-sdk [05-deploy](https://github.com/vivarcus/vivarcus-sdk/blob/main/docs/05-deploy.md)。
+
 ## 输出格式
 
 | 模式 | Flag | 行为 |
@@ -445,4 +483,12 @@ Action
 Operation
   vivarcus operation status  <operation-id>
   vivarcus operation list    [--status <status>]
+
+SDK
+  vivarcus sdk status
+  vivarcus sdk logs      --date YYYY-MM-DD [--format csv|logfile] [-o <file.zip>]
+  vivarcus sdk get       <class_name> [-o <file.go>]
+  vivarcus sdk put       -f <file.go> [--path <rel>] [--module <path>]
+  vivarcus sdk enable    <class_name>
+  vivarcus sdk disable   <class_name>
 ```

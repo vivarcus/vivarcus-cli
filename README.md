@@ -26,7 +26,7 @@ VERSION=v26R3.3-13304 curl -fsSL https://raw.githubusercontent.com/vivarcus/viva
 # 人工首次登录（OAuth Device Flow）
 vivarcus auth login --endpoint https://<your-vault>.vivarcus.com
 
-# Agent / CI: inject token once; do not password-login before every command (4/min/IP+user)
+# Agent / CI: inject token once; do not password-login before every command (10/min/IP+user)
 export VIVARCUS_TOKEN=<session-token>
 export VIVARCUS_ENDPOINT=https://<your-vault>.vivarcus.com
 export VIVARCUS_VAULT=<vault-uuid>
@@ -39,7 +39,7 @@ vivarcus object list study__v --limit 5 --json
 
 | 文档 | 说明 |
 |------|------|
-| [docs/cli.md](docs/cli.md) | 命令参考 |
+| [docs/cli.md](docs/cli.md) | 命令参考（含 `sdk put` / `logs` 等） |
 | [docs/package-deploy.md](docs/package-deploy.md) | Inbound VPK 部署（配合 [Go SDK](https://github.com/vivarcus/vivarcus-sdk)） |
 
 ## 相关仓库
