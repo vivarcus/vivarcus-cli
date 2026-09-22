@@ -290,6 +290,9 @@ vivarcus component create Picklist my-picklist --file attrs.json
 
 # 应用 MDL
 vivarcus component apply-mdl --file changes.mdl
+
+# 预检 MDL（不落库）
+vivarcus component validate --file changes.mdl
 ```
 
 ## Security
@@ -424,6 +427,7 @@ Component
   vivarcus component get      <type> <name>  [--include-mdl]
   vivarcus component create   <type> <name>  [-f <attrs.json>]
   vivarcus component apply-mdl               [-f <file>]
+  vivarcus component validate                [-f <file>]
 
 Security
   vivarcus security user list

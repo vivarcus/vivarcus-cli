@@ -1,6 +1,6 @@
 # 部署 Inbound VPK（SDK Record Action）
 
-配合 [vivarcus-sdk](https://github.com/vivarcus/vivarcus-sdk) 构建的 `gosdk/` VPK，用 `vivarcus` 导入、校验并部署。
+配合 [Go SDK](https://github.com/vivarcus/vivarcus-sdk) 写出的 `gosdk/` VPK（只含 `.go`），用 `vivarcus` 导入、校验并部署；Vault 编译源码。
 
 ## 前置
 
@@ -36,5 +36,5 @@ vivarcus package deploy <package_id> --confirm --json
 ## 验证
 
 1. 打开绑定对象的记录详情
-2. **All Actions** 中应出现 manifest 中的 label
+2. **All Actions** 中应出现 `Meta.Label`
 3. 执行后确认字段/横幅等业务效果
